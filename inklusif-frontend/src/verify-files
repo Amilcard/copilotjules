@@ -1,0 +1,59 @@
+# filepath: /Users/laidhamoudi/Downloads/copilotjules/inklusif-frontend/src/verify-files.sh
+#!/usr/bin/env bash
+
+files=(
+  pages/AccueilPage.tsx
+  pages/ActivityDetailPage.tsx
+  pages/ActivityListPage.tsx
+  pages/AidesFinancieresPage.tsx
+  pages/BackOfficePage.tsx
+  pages/ChildActivitiesPage.tsx
+  pages/CompleteProfilePage.tsx
+  pages/CreateActivityPage.tsx
+  pages/EditActivityPage.tsx
+  pages/LoginPage.tsx
+  pages/ManageChildrenPage.tsx
+  pages/NotificationsRappelsPage.tsx
+  pages/ParentDashboardPage.tsx
+  pages/PendingValidationsPage.tsx
+  pages/RegisterPage.tsx
+  pages/SearchPage.tsx
+  pages/SettingsPage.tsx
+  pages/SocialAuthCallbackPage.tsx
+  pages/UserProfileViewPage.tsx
+
+  components/Common/InfoCard.tsx
+  components/Common/MultiStepProgressBar.tsx
+  components/Common/PasswordStrengthIndicator.tsx
+  components/Common/RegistrationPrompt.tsx
+  components/Common/ToastNotification.tsx
+
+  components/Dashboard/AddEditChildModal.tsx
+  components/Dashboard/DashboardSidebar.tsx
+  components/Dashboard/ReservationRequestCard.tsx
+
+  components/Map/ActivityResultsMap.tsx
+  components/Map/SimpleMapDisplay.tsx
+
+  components/Onboarding/DetailedOnboardingFlow.tsx
+  components/Onboarding/OnboardingTutorial.tsx
+  components/Onboarding/Screens/OnboardingScreen1.tsx
+  components/Onboarding/Screens/OnboardingScreen2.tsx
+  components/Onboarding/Screens/OnboardingScreen3.tsx
+  components/Onboarding/Screens/OnboardingScreen4.tsx
+
+  components/Profile/CompleteProfileForm.tsx
+  components/Profile/ProfileProgressBar.tsx
+
+  components/Search/FilterPanel.tsx
+  components/Search/SearchBar.tsx
+)
+
+echo “Vérification des fichiers :”
+for f in "${files[@]}"; do
+  if [[ -f "$f" ]]; then
+    printf "OK     %s\n" "$f"
+  else
+    printf "MISSING %s\n" "$f"
+  fi
+done

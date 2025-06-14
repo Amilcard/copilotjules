@@ -1,3 +1,3 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* filepath: src/index.css */
+/* TODO: ajouter tes styles globaux */
+body { margin: 0; font-family: sans-serif; }
