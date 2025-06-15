@@ -1,5 +1,4 @@
 {
-<<<<<<< HEAD
   "name": "backend",
   "version": "1.0.0",
   "description": "",
@@ -26,18 +25,5 @@
   "devDependencies": {
     "@types/validator": "^13.15.1",
     "nodemon": "^3.1.10"
-=======
-  "dependencies": {
-    "@nestjs/common": "^10.4.19",
-    "@nestjs/core": "^10.4.19",
-    "@nestjs/platform-express": "^10.4.19",
-    "@nestjs/swagger": "^6.2.0",
-    "swagger-ui-express": "^4.6.3",
-    "express": "^4.18.2"
-  },
-  "devDependencies": {
-    "ts-node": "^10.9.2",
-    "typescript": "^5.4.0"
->>>>>>> f02960f8bff5112b100582690bb5bd0f7adbab65
   }
 }
