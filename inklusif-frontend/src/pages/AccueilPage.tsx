@@ -1,14 +1,14 @@
 import React from "react";
-import InfoCard from "../../Common/InfoCard";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import AccueilPage from "./pages/AccueilPage";
 
-const OnboardingScreen3: React.FC = () => (
-  <div>
-    <InfoCard
-      title="Étape 3"
-      description="Description de l'étape 3"
-      icon={<span>✅</span>}
-    />
-  </div>
+const App: React.FC = () => (
+  <BrowserRouter>
+    <Routes>
+      <Route path="/" element={<AccueilPage />} />
+      {/* tes autres routes… */}
+    </Routes>
+  </BrowserRouter>
 );
 
-export default OnboardingScreen3;
+export default App;
