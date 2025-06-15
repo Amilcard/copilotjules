@@ -1,17 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import InfoCard from '../components/Common/InfoCard';
-import MultiStepProgressBar from '../components/Common/MultiStepProgressBar';
-import activityService, { Activity } from '../services/activityService';
+import activityService, { Activity, ApiError as ActivityApiError } from '../services/activityService';
 import geolocationService, { AppGeolocationCoordinates, GeolocationError } from '../services/geolocationService';
-import territorySubscriptionService, { TerritorySubscriptionResponse } from '../services/territorySubscriptionService';
+import territorySubscriptionService, { TerritorySubscriptionResponse, ApiError as SubscriptionApiError } from '../services/territorySubscriptionService';
 import ActivityCard from '../components/Activity/ActivityCard';
-import DetailedOnboardingFlow from '../components/Onboarding/DetailedOnboardingFlow';
+// import OnboardingTutorial from '../components/Onboarding/OnboardingTutorial'; // Old onboarding
+import DetailedOnboardingFlow from '../components/Onboarding/DetailedOnboardingFlow'; // New onboarding
 import RegistrationPrompt from '../components/Common/RegistrationPrompt';
 import authService from '../services/authService';
 
 // --- Icons (Simple SVGs for now) ---
 const LogoPlaceholder: React.FC<{ size?: string }> = ({ size = "32px" }) => (
-    <div style={{ width: size, height: size, backgroundColor: '#0055A4', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FFFFFF', fontWeight: 'bold', fontSize: `calc(${size} * 0.6)` }}>IK</div>
+    <div style={{ width: size, height: size, backgroundColor: 'var(--color-blue-primary, #0055A4)', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text-light, #FFFFFF)', fontWeight: 'bold', fontSize: `calc(${size} * 0.6)` }}>IK</div>
 );
 
 const MapPinIcon: React.FC<{ size?: string, color?: string }> = ({ size = "24px", color = "#4A90E2" }) => (
@@ -130,7 +129,7 @@ const AccueilPage: React.FC = () => {
         setAllActivities(data); // Store all activities
         setDisplayedActivities(selectRandomActivities(data, 6)); // Display initial random set (e.g., 6)
       } catch (err) {
-        const apiError = err as any; // Using 'any' to avoid TypeScript error
+        const apiError = err as ApiError;
         setActivitiesError(apiError.message || 'Failed to fetch activities.');
         console.error('Fetch activities error:', apiError);
       } finally {
@@ -193,7 +192,7 @@ const AccueilPage: React.FC = () => {
       setSubscriptionMessage(response.message || "Merci ! Nous vous informerons si votre territoire devient couvert.");
       setSubscriptionEmail('');
     } catch (err) {
-      const apiErr = err as any;
+      const apiErr = err as SubscriptionApiError;
       setSubscriptionError(apiErr.message || "Erreur lors de l'inscription. Veuillez réessayer.");
     } finally {
       setIsSubscribing(false);
@@ -239,6 +238,9 @@ const AccueilPage: React.FC = () => {
 
 
   const handleExplorerPlusClick = () => {
+    console.log('Explorer Plus button clicked!');
+    // Add a class to trigger fade-out, then update, then fade-in
+    // For simplicity now, just re-select. A proper animation needs more state/useEffect.
     setDisplayedActivities(selectRandomActivities(allActivities, 6)); 
   };
 
@@ -253,17 +255,10 @@ const AccueilPage: React.FC = () => {
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
-
-    .accueil-container {
-      max-width: 1200px;
-      margin: 0 auto;
-    }
   `;
 
   return (
     <div className="accueil-container global-padding" style={{ paddingTop: 'var(--global-padding)' }}>
-      <style>{animationStyles}</style>
-      
       <DetailedOnboardingFlow 
         isVisible={showOnboarding} 
         onComplete={handleOnboardingComplete} 
@@ -277,7 +272,7 @@ const AccueilPage: React.FC = () => {
               fontFamily: 'var(--font-primary)', 
               fontSize: '24px', 
               fontWeight: 'var(--font-weight-semibold)', 
-              color: '#0055A4',
+              color: 'var(--color-blue-primary)',
               marginLeft: '12px',
               marginBlock: '0px'
             }}>
@@ -292,18 +287,13 @@ const AccueilPage: React.FC = () => {
         </div>
       </header>
 
-      {/* Progress Bar */}
-      <div style={{ margin: '16px 0' }}>
-        <MultiStepProgressBar currentStep={2} totalSteps={5} />
-      </div>
-
       {/* Territory Message Section & Subscription Form */}
       {!isLoadingLocation && territoryStatus && (
         <div className="territory-info-bar" style={{ 
             padding: '15px', marginBottom: '24px', borderRadius: '8px', 
-            backgroundColor: territoryStatus.isCovered ? '#E7F3FF' : '#FFF0E9',
-            color: territoryStatus.isCovered ? '#0055A4' : '#D95B4E',
-            border: `1px solid ${territoryStatus.isCovered ? '#B3D4FF' : '#FFD1C8'}`,
+            backgroundColor: territoryStatus.isCovered ? 'var(--color-blue-primary-light, #E7F3FF)' : 'var(--color-orange-primary-light, #FFF0E9)',
+            color: territoryStatus.isCovered ? 'var(--color-blue-primary, #0055A4)' : 'var(--color-orange-primary-dark, #D95B4E)',
+            border: `1px solid ${territoryStatus.isCovered ? 'var(--color-blue-primary-border, #B3D4FF)' : 'var(--color-orange-primary-border, #FFD1C8)'}`,
             textAlign: 'center',
         }}>
             <p style={{margin:'0 0 15px 0'}}>{territoryStatus.message}</p>
@@ -313,7 +303,7 @@ const AccueilPage: React.FC = () => {
               <form onSubmit={handleTerritorySubscription} className="subscription-form" style={{marginBottom: '15px'}}>
                 <p style={{fontSize: '0.9em', marginBottom: '8px'}}>Soyez notifié quand nous couvrirons le territoire : <strong>{territoryStatus.territoryName}</strong></p>
                 <input type="email" value={subscriptionEmail} onChange={handleSubscriptionEmailChange} placeholder="Votre adresse e-mail" disabled={isSubscribing} style={{ padding: '8px 10px', borderRadius: '4px', border: '1px solid #ccc', marginRight: '8px', minWidth: '220px', fontSize: '0.9rem' }} />
-                <button type="submit" disabled={isSubscribing} style={{ padding: '8px 15px', borderRadius: '4px', border: 'none', backgroundColor: '#CCCCCC', color: '#333333', cursor: isSubscribing ? 'wait' : 'pointer', fontSize: '0.9rem' }}>
+                <button type="submit" disabled={isSubscribing} style={{ padding: '8px 15px', borderRadius: '4px', border: 'none', backgroundColor: 'var(--color-secondary-button, #CCCCCC)', color: 'var(--color-text-primary, #333333)', cursor: isSubscribing ? 'wait' : 'pointer', fontSize: '0.9rem' }}>
                   {isSubscribing ? 'Envoi...' : 'Me notifier'}
                 </button>
                 {subscriptionMessage && <p style={{ color: 'green', fontSize: '0.85em', marginTop: '5px' }}>{subscriptionMessage}</p>}
@@ -323,8 +313,8 @@ const AccueilPage: React.FC = () => {
 
             {/* Postal Code Check Form - Show if geoloc failed OR if territory is not covered */}
             {(territoryStatus.territoryName.toLowerCase().includes("inconnue") || !territoryStatus.isCovered) && (
-                 <form onSubmit={handlePostalCodeCheck} className="postal-code-form" style={{ borderTop: '1px solid #ddd', paddingTop: '15px', marginTop: !territoryStatus.isCovered && !territoryStatus.territoryName.toLowerCase().includes("inconnue") ? '15px' : '0' }}>
-                    <label htmlFor="postalCodeInput" style={{display: 'block', marginBottom: '8px', fontSize: '0.9em', fontWeight: 600}}>
+                 <form onSubmit={handlePostalCodeCheck} className="postal-code-form" style={{ borderTop: '1px solid var(--color-border-soft, #ddd)', paddingTop: '15px', marginTop: !territoryStatus.isCovered && !territoryStatus.territoryName.toLowerCase().includes("inconnue") ? '15px' : '0' }}>
+                    <label htmlFor="postalCodeInput" style={{display: 'block', marginBottom: '8px', fontSize: '0.9em', fontWeight: 'var(--font-weight-semibold)'}}>
                         Ou vérifiez la couverture pour un code postal :
                     </label>
                     <input 
@@ -334,17 +324,17 @@ const AccueilPage: React.FC = () => {
                         onChange={handlePostalCodeInputChange}
                         placeholder="Entrez un code postal (ex: 75001)"
                         disabled={isLoadingPostalCode}
-                        style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid #DDDDDD', marginRight: '8px', width: '180px', height: '44px', fontSize: '0.9rem' }}
+                        style={{ padding: '10px 12px', borderRadius: 'var(--button-border-radius, 8px)', border: '1px solid #DDDDDD', marginRight: '8px', width: '180px', height: '44px', fontSize: '0.9rem' }}
                     />
                     <button 
                         type="submit" 
                         disabled={isLoadingPostalCode}
-                        className="primary"
+                        className="primary" // Use primary button style
                         style={{ height: '44px', padding: '10px 20px', fontSize: '0.9rem' }}
                     >
                         {isLoadingPostalCode ? 'Vérification...' : 'Vérifier'}
                     </button>
-                    {postalCodeStatusMessage && <p style={{ color: '#666', fontSize: '0.85em', marginTop: '5px' }}>{postalCodeStatusMessage}</p>}
+                    {postalCodeStatusMessage && <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.85em', marginTop: '5px' }}>{postalCodeStatusMessage}</p>}
                  </form>
             )}
         </div>
@@ -360,7 +350,7 @@ const AccueilPage: React.FC = () => {
             maxWidth: '600px', 
             height: '48px',
             fontSize: '16px',
-            fontWeight: 700,
+            fontWeight: 'var(--font-weight-bold)',
             display: 'block', 
             margin: '0 auto', 
           }}
@@ -369,25 +359,8 @@ const AccueilPage: React.FC = () => {
         </button>
       </div>
 
-      {/* Info Cards Section */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: 16,
-          marginBottom: 24,
-        }}
-      >
-        <InfoCard title="Utilisateurs inscrits" value={1234} icon={<span>👥</span>} />
-        <InfoCard
-          title="Activités disponibles"
-          value={56}
-          variant="secondary"
-          icon={<span>🏃‍♂️</span>}
-        />
-      </div>
-
       {/* Activities Grid Section */}
+      <style>{animationStyles}</style> {/* Inject animation CSS */}
       {isLoadingActivities && <p>Loading activities...</p>}
       {activitiesError && <p style={{ color: 'red', textAlign: 'center' }}>Error fetching activities: {activitiesError}</p>}
       {!isLoadingActivities && !activitiesError && displayedActivities.length === 0 && allActivities.length > 0 && (
@@ -415,9 +388,19 @@ const AccueilPage: React.FC = () => {
         isVisible={showRegistrationPrompt && !isAuthenticated} 
         onDismiss={() => {
           setShowRegistrationPrompt(false);
-          sessionStorage.setItem('registrationPromptDismissed', 'true');
+          sessionStorage.setItem('registrationPromptDismissed', 'true'); // Dismiss for the session
         }} 
       />
+
+      <style>{`
+        </div>
+      )}
+      <style>{`
+        .accueil-container {
+          max-width: 1200px; /* Max width for the main content area */
+          margin: 0 auto; /* Center the content area */
+        }
+      `}</style>
     </div>
   );
 };
