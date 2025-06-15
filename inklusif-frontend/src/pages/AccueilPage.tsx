@@ -3,7 +3,8 @@ import InfoCard from '../components/Common/InfoCard';
 import MultiStepProgressBar from '../components/Common/MultiStepProgressBar';
 
 const AccueilPage: React.FC = () => (
-  <div style={{ padding: 24 }}>
+
+<div style={{ padding: 24 }}>
     <h1>Bienvenue sur Inklusif</h1>
     <div style={{ margin: '16px 0' }}>
       <MultiStepProgressBar currentStep={2} totalSteps={5} />

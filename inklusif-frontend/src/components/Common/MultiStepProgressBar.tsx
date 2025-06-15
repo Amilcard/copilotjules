@@ -5,11 +5,7 @@ interface MultiStepProgressBarProps {
   totalSteps: number;
 }
 
-const 
-MultiStepProgressBar: React.FC<MultiStepProgressBarProps> = ({
-  currentStep,
-  totalSteps,
-}) => {
+const MultiStepProgressBar: React.FC<MultiStepProgressBarProps> = ({ currentStep, totalSteps }) => {
   const containerStyle: React.CSSProperties = {
     width: '100%',
     height: '4px', // Spec: Height 4px
